@@ -25,21 +25,24 @@ set(CPACK_STRIP_FILES 1)
 
 #arch
 if(X86)
-  set(CPACK_DEBIAN_ARCHITECTURE "i386")
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
   set(CPACK_RPM_PACKAGE_ARCHITECTURE "i686")
 elseif(X86_64)
-  set(CPACK_DEBIAN_ARCHITECTURE "amd64")
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
   set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
 elseif(ARM)
-  set(CPACK_DEBIAN_ARCHITECTURE "armhf")
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
   set(CPACK_RPM_PACKAGE_ARCHITECTURE "armhf")
+elseif(AARCH64)
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
+  set(CPACK_RPM_PACKAGE_ARCHITECTURE "aarch64")
 else()
-  set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
   set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 endif()
 
 if(CPACK_GENERATOR STREQUAL "DEB")
-  set(OPENCV_PACKAGE_ARCH_SUFFIX ${CPACK_DEBIAN_ARCHITECTURE})
+  set(OPENCV_PACKAGE_ARCH_SUFFIX ${CPACK_DEBIAN_PACKAGE_ARCHITECTURE})
 elseif(CPACK_GENERATOR STREQUAL "RPM")
   set(OPENCV_PACKAGE_ARCH_SUFFIX ${CPACK_RPM_PACKAGE_ARCHITECTURE})
 else()
@@ -111,6 +114,35 @@ if(HAVE_TBB AND NOT BUILD_TBB)
     set(CPACK_DEB_DEV_PACKAGE_DEPENDS "libtbb-dev")
   endif()
 endif()
+
+set(STD_OPENCV_LIBS opencv-data libopencv-calib3d2.4 libopencv-contrib2.4 libopencv-core2.4
+    libopencv-features2d2.4 libopencv-flann2.4 libopencv-gpu2.4 libopencv-imgproc2.4
+    libopencv-ml2.4 libopencv-ocl2.4 libopencv-stitching2.4 libopencv-ts2.4 libopencv-videostab2.4)
+
+set(STD_OPENCV_DEV libopencv-calib3d-dev libopencv-contrib-dev libopencv-core-dev
+    libopencv-dev libopencv-features2d-dev libopencv-flann-dev libopencv-gpu-dev
+    libopencv-highgui-dev libopencv-imgproc-dev libopencv-legacy-dev libopencv-ml-dev
+    libopencv-objdetect-dev libopencv-ocl-dev libopencv-photo-dev libopencv-stitching-dev
+    libopencv-superres-dev libopencv-ts-dev libopencv-video-dev libopencv-videostab-dev)
+
+string(REPLACE ";" ", " CPACK_COMPONENT_LIBS_CONFLICTS "${STD_OPENCV_LIBS}")
+string(REPLACE ";" ", " CPACK_COMPONENT_LIBS_PROVIDES "${STD_OPENCV_LIBS}")
+string(REPLACE ";" ", " CPACK_COMPONENT_LIBS_REPLACES "${STD_OPENCV_LIBS}")
+
+string(REPLACE ";" ", " CPACK_COMPONENT_DEV_CONFLICTS "${STD_OPENCV_DEV}")
+string(REPLACE ";" ", " CPACK_COMPONENT_DEV_PROVIDES "${STD_OPENCV_DEV}")
+string(REPLACE ";" ", " CPACK_COMPONENT_DEV_REPLACES "${STD_OPENCV_DEV}")
+
+set(CPACK_COMPONENT_PYTHON_CONFLICTS python-opencv)
+set(CPACK_COMPONENT_PYTHON_PROVIDES python-opencv)
+set(CPACK_COMPONENT_PYTHON_REPLACES python-opencv)
+
+set(CPACK_COMPONENT_JAVA_CONFLICTS "libopencv2.4-java, libopencv2.4-jni")
+set(CPACK_COMPONENT_JAVA_PROVIDES "libopencv2.4-java, libopencv2.4-jni")
+set(CPACK_COMPONENT_JAVA_REPLACES "libopencv2.4-java, libopencv2.4-jni")
+
+set(CPACK_COMPONENT_DOCS_CONFLICTS opencv-doc)
+set(CPACK_COMPONENT_SAMPLES_CONFLICTS opencv-doc)
 
 if(NOT OPENCV_CUSTOM_PACKAGE_INFO)
   set(CPACK_COMPONENT_LIBS_DESCRIPTION "Open Computer Vision Library")
